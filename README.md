@@ -27,3 +27,8 @@
 - 谷中、青木、遠藤の認証用メールは yanaka@ys-toyo.example、aoki@ys-toyo.example、endo@ys-toyo.example。各自異なるパスワードでAuto Confirmを有効にして作成し、membersテーブルへ登録する。
 - 架空アドレスではメールによる復旧ができないため管理者によるパスワード再設定が必要。
 - 既存ユーザーのメール変更を確認してから新しいindex.htmlとapp.jsを同時に公開する。実環境の認証は未検証。
+
+## Ver.1.3
+- 全予約日程の参加状況一覧を追加。最新情報に更新、日付から個別回答へ移動可能。
+- CSV取り込み結果をボタン直下に表示。取り込み後は全日程表示。
+- 更新時は index.html、app.js、style.css の3ファイルを上書き。Supabaseの変更不要。

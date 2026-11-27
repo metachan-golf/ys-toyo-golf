@@ -27,8 +27,30 @@ function quote(v){let s=String(v??'');if(/^[=+\-@\t\r]/.test(s))s="'"+s;return '
 $('loginForm').onsubmit=e=>{e.preventDefault();run(async()=>{check(await db.auth.signInWithPassword({email:$('loginMember').value+'@ys-toyo.example',password:$('password').value}));$('password').value='';await session();msg('ログインしました。');});};
 $('logout').onclick=()=>run(async()=>{check(await db.auth.signOut());await session();msg('ログアウトしました。');});$('reload').onclick=()=>run(load);$('month').onchange=render;$('clearForm').onclick=clearForm;
 $('roundForm').onsubmit=e=>{e.preventDefault();run(async()=>{if(!me?.admin)throw Error('管理者専用です。');const r=validate({id:$('rid').value||crypto.randomUUID(),play_date:$('date').value,course:$('course').value,time1:$('time1').value,time2:$('time2').value||null,capacity:Number($('capacity').value),status:$('status').value,deadline:$('deadline').value||null,notes:$('notes').value});check(await db.from('rounds').upsert(r));clearForm();await load();msg('予約を保存しました。');});};
-$('importCsv').onclick=()=>run(async()=>{if(!me?.admin)throw Error('管理者専用です。');const f=$('csvFile').files[0];if(!f)throw Error('CSVファイルを選択してください。');const rs=csvRows(await f.text());const existing=rs.filter(r=>rounds.some(x=>x.id===r.id)).length;if(!confirm(`${rs.length}件を取り込みます（既存ID更新 ${existing}件、新規 ${rs.length-existing}件）。実行しますか？`))return; // preserve optional columns on existing rows
-const merged=rs.map(r=>({...{deadline:null,notes:''},...((({deadline,notes})=>({deadline,notes}))(rounds.find(x=>x.id===r.id)||{deadline:null,notes:''})),...r}));check(await db.from('rounds').upsert(merged));await load();msg(rs.length+'件を取り込みました。');});
+// CSV import: show progress and results beside the file picker.
+const csvNotice=node('p');csvNotice.id='csvNotice';csvNotice.setAttribute('role','status');csvNotice.setAttribute('aria-live','polite');$('importCsv').parentNode.append(csvNotice);
+function csvMsg(text,error=false){csvNotice.textContent=text;csvNotice.className=error?'error':'';}
+$('importCsv').onclick=async()=>{
+ if(busy){csvMsg('別の処理が実行中です。完了後に再実行してください。',true);return;}
+ busy=true;$('importCsv').disabled=true;
+ let saved=false;
+ try{
+  if(!me?.admin)throw Error('管理者専用です。');
+  const f=$('csvFile').files[0];if(!f)throw Error('CSVファイルを選択してください。');
+  csvMsg('CSVを確認中…');
+  const rs=csvRows(await f.text());
+  const current=check(await db.from('rounds').select('*'));
+  const existing=rs.filter(r=>current.some(x=>x.id===r.id)).length;
+  if(!confirm(`${rs.length}件を取り込みます（既存ID更新 ${existing}件、新規 ${rs.length-existing}件）。実行しますか？`)){csvMsg('取り込みを中止しました。');return;}
+  csvMsg('データベースに保存中…');
+  const merged=rs.map(r=>{const old=current.find(x=>x.id===r.id);return {deadline:old?.deadline??null,notes:old?.notes??'',...r};});
+  check(await db.from('rounds').upsert(merged,{onConflict:'id'}));saved=true;
+  await load();$('month').value='all';render();
+  csvMsg(`取り込み完了：${rs.length}件（既存更新 ${existing}件、新規 ${rs.length-existing}件）。全日程を表示しています。`);
+  msg('CSV取り込みが完了しました。');$('csvFile').value='';
+ }catch(e){const detail=[e.message,e.details,e.hint,e.code].filter(Boolean).join(' / ')||String(e);csvMsg((saved?'保存済みですが画面更新に失敗しました：':'取り込みエラー：')+detail,true);}
+ finally{busy=false;$('importCsv').disabled=false;}
+};
 $('exportCsv').onclick=()=>run(async()=>{await load();download('reservations.csv',[headers,...rounds.map(r=>[r.id,r.play_date,r.course,time(r.time1),time(r.time2),r.capacity,r.status,r.deadline,r.notes])].map(r=>r.map(quote).join(',')).join('\r\n'));});
 $('share').onclick=()=>run(async()=>{const text='【トーヨーCC 参加予定】\n'+visibleRounds().map(r=>dateLabel(r.play_date)+' '+r.course+' '+time(r.time1)+(r.time2?'／'+time(r.time2):'')+' '+r.status+'\n'+members.map(m=>{const a=answerFor(r,m);return m.name+'：'+(a?.answer||'－')+(a?.guests?' ＋ゲスト'+a.guests:'');}).join('\n')).join('\n\n');await navigator.clipboard.writeText(text);msg('LINE共有用テキストをコピーしました。');});
 run(session);

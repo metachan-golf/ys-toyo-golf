@@ -68,9 +68,10 @@
             <label>備考<input id="notes"></label>
           </div>
           <div class="toolbar">
-            <button>予約を保存</button>
+            <button id="saveRound" type="submit">予約を保存</button>
             <button type="button" class="secondary" id="clearForm">新規登録に戻す</button>
           </div>
+          <p id="saveNotice" role="status" aria-live="polite"></p>
         </form>
         <h3>CSV一括登録・更新</h3>
         <p class="muted">UTF-8のCSVを選択。同じ予約IDは更新、CSVにない予約は保持します。</p>

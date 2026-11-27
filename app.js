@@ -14,7 +14,7 @@ function answerFor(r,m){return answers.find(a=>a.round_id===r.id&&a.member_id===
 function count(r){return answers.filter(a=>a.round_id===r.id&&a.answer==='○').reduce((n,a)=>n+1+a.guests,0);}
 function visibleRounds(){return rounds.filter(r=>$('month').value==='all'||r.play_date.startsWith($('month').value));}
 async function load(){const [m,r,a]=await Promise.all([db.from('members').select('*'),db.from('rounds').select('*').order('play_date').order('time1'),db.from('attendance').select('*')]);members=check(m);rounds=check(r);answers=check(a);lastLoaded=new Date();const old=$('month').value;const months=[...new Set(rounds.map(r=>r.play_date.slice(0,7)))];$('month').replaceChildren(new Option('すべて','all'),...months.map(m=>new Option(m.replace('-','年')+'月',m)));$('month').value=months.includes(old)||old==='all'?old:(months.find(m=>m>=today().slice(0,7))||months[0]||'all');render();}
-async function session(){const s=check(await db.auth.getSession()).session;$('club').hidden=true;$('login').hidden=false;me=null;members=[];rounds=[];answers=[];$('rounds').replaceChildren();$('overviewTable').replaceChildren();$('overviewUpdated').textContent='';$('csvNotice').textContent='';$('deleteNotice').textContent='';lastLoaded=null;if(!s)return;const m=check(await db.from('members').select('*').eq('id',s.user.id).maybeSingle());if(!m){await db.auth.signOut();throw Error('会員登録がありません。管理者へご連絡ください。');}me=m;$('who').textContent=m.name+' さん'+(m.admin?'（管理者）':'');$('admin').hidden=!m.admin;$('login').hidden=true;$('club').hidden=false;await load();}
+async function session(){const s=check(await db.auth.getSession()).session;$('club').hidden=true;$('login').hidden=false;me=null;members=[];rounds=[];answers=[];$('rounds').replaceChildren();$('overviewTable').replaceChildren();$('overviewUpdated').textContent='';$('csvNotice').textContent='';$('saveNotice').textContent='';$('deleteNotice').textContent='';lastLoaded=null;if(!s)return;const m=check(await db.from('members').select('*').eq('id',s.user.id).maybeSingle());if(!m){await db.auth.signOut();throw Error('会員登録がありません。管理者へご連絡ください。');}me=m;$('who').textContent=m.name+' さん'+(m.admin?'（管理者）':'');$('admin').hidden=!m.admin;$('login').hidden=true;$('club').hidden=false;await load();}
 function sortedMembers(){const order=['谷中さん','森山','青木さん','遠藤さん'];return [...members].sort((a,b)=>(order.includes(a.name)?order.indexOf(a.name):99)-(order.includes(b.name)?order.indexOf(b.name):99)||a.name.localeCompare(b.name,'ja'));}
 function renderOverview(){
  const root=$('overviewTable');root.replaceChildren();
@@ -47,17 +47,46 @@ async function deleteRound(r){
  }catch(e){notice.className='csv-error';notice.textContent=(deleted?'削除済みですが画面更新に失敗しました：':'削除エラー：')+[e.message,e.details,e.hint,e.code].filter(Boolean).join(' / ');}
  notice.scrollIntoView({block:'nearest'});
 }
-function edit(r){for(const [k,v] of Object.entries({rid:r.id,date:r.play_date,course:r.course,time1:time(r.time1),time2:time(r.time2),capacity:r.capacity,status:r.status,deadline:r.deadline||'',notes:r.notes||''}))$(k).value=v;}
+function edit(r){$('saveNotice').textContent='';for(const [k,v] of Object.entries({rid:r.id,date:r.play_date,course:r.course,time1:time(r.time1),time2:time(r.time2),capacity:r.capacity,status:r.status,deadline:r.deadline||'',notes:r.notes||''}))$(k).value=v;}
 function clearForm(){$('roundForm').reset();$('rid').value='';}
-function validate(r){if(!/^[A-Za-z0-9_-]{1,80}$/.test(r.id)||!/^\d{4}-\d{2}-\d{2}$/.test(r.play_date)||!['OUT','IN'].includes(r.course)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(r.time1)||r.time2&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(r.time2)||!Number.isInteger(r.capacity)||r.capacity<1||r.capacity>(r.time2?8:4)||!statuses.includes(r.status)||r.deadline&&(!/^\d{4}-\d{2}-\d{2}$/.test(r.deadline)||r.deadline>r.play_date))throw Error('予約形式を確認してください：'+r.id);return r;}
+function validate(r){
+ const fail=t=>{throw Error(t+'（予約ID：'+r.id+'）');};
+ const validDate=d=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&!isNaN(Date.parse(d+'T00:00:00Z'))&&new Date(d+'T00:00:00Z').toISOString().slice(0,10)===d;
+ const validTime=t=>/^([01]\d|2[0-3]):[0-5]\d$/.test(t);
+ if(!/^[A-Za-z0-9_-]{1,80}$/.test(r.id))fail('予約IDが不正です。');
+ if(!validDate(r.play_date))fail('プレー日を正しく指定してください。');
+ if(!['OUT','IN'].includes(r.course))fail('コースを指定してください。');
+ if(!validTime(r.time1))fail('1組目の時刻を正しく指定してください。');
+ if(r.time2&&!validTime(r.time2))fail('2組目の時刻を正しく指定してください。');
+ if(!Number.isInteger(r.capacity)||r.capacity<1||r.capacity>(r.time2?8:4))fail('定員は'+(r.time2?'1〜8':'1〜4')+'名で指定してください。');
+ if(!statuses.includes(r.status))fail('予約状態を確認してください。');
+ if(r.deadline&&(!validDate(r.deadline)||r.deadline>r.play_date))fail('回答期限はプレー日以前の日付を指定してください。');
+ return r;
+}
 function parseCSV(s){s=s.replace(/^\uFEFF/,'');let rows=[],row=[],cell='',q=false;for(let i=0;i<s.length;i++){let c=s[i];if(q){if(c==='"'&&s[i+1]==='"'){cell+='"';i++;}else if(c==='"')q=false;else cell+=c;}else if(c==='"'&&cell==='')q=true;else if(c===','){row.push(cell);cell='';}else if(c==='\n'||c==='\r'){if(c==='\r'&&s[i+1]==='\n')i++;row.push(cell);if(row.some(x=>x!==''))rows.push(row);row=[];cell='';}else cell+=c;}if(q)throw Error('CSVの引用符が閉じていません。');row.push(cell);if(row.some(x=>x!==''))rows.push(row);return rows;}
 const headers=['予約ID','プレー日','コース','1組目','2組目','定員','状態','回答期限','備考'];
 function csvRows(text){const [h,...rs]=parseCSV(text);if(!h||h.length<7||h.length>9||h.some((v,i)=>v.trim()!==headers[i])||!rs.length)throw Error('CSVの見出しまたはデータが不正です。');const seen=new Set();return rs.map(v=>{if(v.length!==h.length)throw Error('CSVの列数が不正です。');const [id,date,course,t1,t2,cap,status,deadline,notes]=v;const normalize=d=>d.trim().replaceAll('/','-').replace(/^(\d{4})-(\d{1,2})-(\d{1,2})$/,(_,y,m,d)=>y+'-'+m.padStart(2,'0')+'-'+d.padStart(2,'0'));const r={id:id.trim(),play_date:normalize(date),course:course.trim(),time1:t1.trim().slice(0,5).padStart(5,'0'),time2:t2.trim()?t2.trim().slice(0,5).padStart(5,'0'):null,capacity:Number(cap),status:status.trim()};if(h.length>=8)r.deadline=deadline.trim()?normalize(deadline):null;if(h.length>=9)r.notes=notes;if(seen.has(r.id))throw Error('予約IDが重複しています：'+r.id);seen.add(r.id);return validate(r);});}
 function download(name,text){const url=URL.createObjectURL(new Blob(['\uFEFF'+text],{type:'text/csv;charset=utf-8'}));const a=node('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function quote(v){let s=String(v??'');if(/^[=+\-@\t\r]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"';}
 $('loginForm').onsubmit=e=>{e.preventDefault();run(async()=>{check(await db.auth.signInWithPassword({email:$('loginMember').value+'@ys-toyo.example',password:$('password').value}));$('password').value='';await session();msg('ログインしました。');});};
-$('logout').onclick=()=>run(async()=>{check(await db.auth.signOut());await session();msg('ログアウトしました。');});$('reload').onclick=()=>run(load);$('overviewReload').onclick=()=>run(load);$('month').onchange=render;$('clearForm').onclick=clearForm;
-$('roundForm').onsubmit=e=>{e.preventDefault();run(async()=>{if(!me?.admin)throw Error('管理者専用です。');const r=validate({id:$('rid').value||crypto.randomUUID(),play_date:$('date').value,course:$('course').value,time1:$('time1').value,time2:$('time2').value||null,capacity:Number($('capacity').value),status:$('status').value,deadline:$('deadline').value||null,notes:$('notes').value});check(await db.from('rounds').upsert(r));clearForm();await load();msg('予約を保存しました。');});};
+$('logout').onclick=()=>run(async()=>{check(await db.auth.signOut());await session();msg('ログアウトしました。');});$('reload').onclick=()=>run(load);$('overviewReload').onclick=()=>run(load);$('month').onchange=render;$('clearForm').onclick=()=>{clearForm();$('saveNotice').textContent='';};
+function saveMsg(text,error=false){const n=$('saveNotice');n.textContent=text;n.className=error?'csv-error':'csv-success';}
+$('roundForm').onsubmit=async e=>{
+ e.preventDefault();
+ if(busy){saveMsg('別の処理が実行中です。完了後に再実行してください。',true);return;}
+ busy=true;$('saveRound').disabled=true;let saved=false;
+ try{
+  if(!me?.admin)throw Error('管理者専用です。');
+  saveMsg('入力内容を確認中…');
+  const r=validate({id:$('rid').value||crypto.randomUUID(),play_date:$('date').value,course:$('course').value,time1:$('time1').value,time2:$('time2').value||null,capacity:Number($('capacity').value),status:$('status').value,deadline:$('deadline').value||null,notes:$('notes').value});
+  saveMsg('予約を保存中…');
+  check(await db.from('rounds').upsert(r));saved=true;
+  clearForm();await load();
+  $('month').value=r.play_date.slice(0,7);render();
+  saveMsg(r.play_date+' の予約を保存しました。参加状況一覧も更新しました。');
+ }catch(e){saveMsg((saved?'保存済みですが画面更新に失敗しました：':'予約を保存できませんでした：')+([e.message,e.details,e.hint,e.code].filter(Boolean).join(' / ')||String(e)),true);}
+ finally{busy=false;$('saveRound').disabled=false;$('saveNotice').scrollIntoView({block:'nearest'});}
+};
 // CSV import: show progress and results beside the file picker.
 const csvNotice=$('csvNotice');
 function csvMsg(text,error=false){csvNotice.textContent=text;csvNotice.className=error?'csv-error':'csv-success';}

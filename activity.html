@@ -9,14 +9,15 @@
   <link rel="icon" type="image/png" sizes="96x96" href="favicon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <script defer src="pwa.js?v=1.11.1"></script>
+  <script defer src="pwa.js?v=1.15.1"></script>
   <title>メンバー利用状況 | ワイズ トーヨーCCの会</title>
   <meta name="robots" content="noindex,nofollow">
-  <link rel="stylesheet" href="style.css?v=1.11.1">
+  <link rel="stylesheet" href="style.css?v=1.15.1">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="config.js"></script>
-  <script defer src="weather.js?v=1.11.1"></script>
-  <script defer src="app.js?v=1.11.1"></script>
+  <script defer src="weather.js?v=1.15.1"></script>
+  <script defer src="features.js?v=1.15.1"></script>
+  <script defer src="app.js?v=1.15.1"></script>
 </head>
 <body>
   <header>
@@ -48,7 +49,7 @@
         <strong id="who"></strong>
         <button id="logout" class="secondary">ログアウト</button>
       </div>
-      <nav class="page-nav"><a class="button secondary" href="index.html">予約・参加登録</a><a class="button secondary" href="overview.html">みんなの参加登録状況</a><a id="adminMenu" class="button secondary" href="admin.html" hidden>予約管理</a><a id="activityMenu" class="button secondary" href="activity.html" hidden>メンバー利用状況</a></nav>
+      <nav class="page-nav"><a class="button secondary" href="index.html">予約・参加登録</a><a class="button secondary" href="overview.html">みんなの参加登録状況</a><a id="adminMenu" class="button secondary" href="admin.html" hidden>予約管理</a><a id="activityMenu" class="button secondary" href="activity.html" hidden>メンバー利用状況</a><a class="button secondary" href="scores.html">スコア登録</a><a class="button secondary" href="results.html">メンバー成績</a><a class="button secondary" href="awards.html">年間表彰</a><a class="button secondary" href="notices.html">お知らせ</a></nav>
         <section id="activitySection" hidden data-nosnippet><div class="toolbar"><h3>メンバー利用状況</h3><button id="activityReload" type="button" class="secondary">利用状況を更新</button></div><p class="muted">日本時間。直近5分以内はアクセスの目安です。ログイン回数は機能追加後に確認した回数で、過去の全履歴ではありません。</p><div id="activityList" class="activity-list"></div><p id="activityNotice" role="status" class="muted"></p></section>
       <div id="schedulePage" hidden>
       <h2>予約一覧</h2>
@@ -99,6 +100,6 @@
       </section>
     </section>
   </main>
-  <footer>ys TOYO GOLF CLUB <small>v1.11.1</small></footer>
+  <footer>ys TOYO GOLF CLUB <small>v1.15.1</small></footer>
 </body>
 </html>

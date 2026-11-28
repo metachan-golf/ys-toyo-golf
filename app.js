@@ -35,7 +35,7 @@ function renderOverview(){
  for(const label of ['日程','予約者',...people.map(m=>m.name),'参加人数']){const th=node('th',label);th.scope='col';hr.append(th);}head.append(hr);table.append(head);
  const body=node('tbody');
  for(const r of upcoming()){const row=node('tr');if(r.status==='中止')row.className='cancelled';
-  const day=node('th');day.scope='row';const link=node('a',r.play_date.slice(0,4)+'年 '+dateLabel(r.play_date),'date-link');link.href='index.html?round='+encodeURIComponent(r.id);day.append(link,node('small',r.course+' '+time(r.time1)+(r.time2?' / '+time(r.time2):'')),node('small',r.status));if(needsCancelCheck(r))day.append(node('small',warningText(r),today()>=cancelDate(r)?'no':'muted'));row.append(day,node('td',bookerName(r)));
+  const day=node('th');day.scope='row';const link=node('a',r.play_date.slice(0,4)+'年 '+dateLabel(r.play_date),'date-link');link.href='index.html?round='+encodeURIComponent(r.id);day.append(link,node('small',r.course+' '+time(r.time1)+(r.time2?' / '+time(r.time2):'')),node('small',r.status));row.append(day,node('td',bookerName(r)));
   for(const m of people){const a=answerFor(r,m);const v=a?.answer||'－';const td=node('td',v,v==='○'?'yes':v==='△'?'maybe':v==='×'?'no':'unanswered');td.title=v==='○'?'参加可能':v==='△'?'調整中':v==='×'?'不参加':'未回答';if(a?.guests)td.append(node('small','＋'+a.guests+'名'));row.append(td);}
   const n=count(r);row.append(node('td',n+' / '+r.capacity,n>r.capacity?'no':'total'));body.append(row);
  }table.append(body);root.append(table);if(!upcoming().length)root.append(node('p','登録された予約はありません。'));

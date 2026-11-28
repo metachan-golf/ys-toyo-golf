@@ -4,17 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>ワイズ トーヨーCCの会</title>
-  <link rel="stylesheet" href="style.css?v=1.4">
+  <link rel="stylesheet" href="style.css?v=1.6">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="config.js"></script>
-  <script defer src="app.js?v=1.4"></script>
+  <script defer src="app.js?v=1.6"></script>
 </head>
 <body>
   <header>
     <div class="brand">
       <img src="logo.png" alt="YS × TOYO ロゴ" class="brand-logo">
       <div class="brand-copy">
-        <small>Y's TRANS × TOYO COUNTRY CLUB</small>
+        <small>ys TRANS × TOYO COUNTRY CLUB</small>
         <h1>ワイズ トーヨーCCの会</h1>
         <p>ラウンド予約・参加管理</p>
       </div>
@@ -38,17 +38,13 @@
         <strong id="who"></strong>
         <button id="logout" class="secondary">ログアウト</button>
       </div>
+      <nav class="page-nav"><a class="button secondary" href="index.html">予約・参加登録</a><a class="button secondary" href="overview.html">みんなの参加登録状況</a></nav>
+      <div id="schedulePage">
       <div class="toolbar">
         <label>表示月<select id="month"></select></label>
         <button id="reload" class="secondary">更新</button>
       </div>
       <p class="muted">○ 参加可能　△ 調整中　× 不参加　－ 未回答</p>
-      <section id="overview" aria-labelledby="overviewTitle">
-        <div class="toolbar"><h2 id="overviewTitle">みんなの参加登録状況</h2><button id="overviewReload" class="secondary" type="button">最新情報に更新</button></div>
-        <p class="muted">全予約日程を表示します。日付を押すと該当する予約の回答欄に移動します。</p>
-        <div id="overviewTable" class="overview-scroll" tabindex="0"></div>
-        <p id="overviewUpdated" class="muted"></p>
-      </section>
       <p id="deleteNotice" role="status" aria-live="polite"></p>
       <div id="rounds"></div>
       <button id="share" class="secondary">LINE共有用テキストをコピー</button>
@@ -58,6 +54,7 @@
         <form id="roundForm">
           <input id="rid" type="hidden">
           <div class="fields">
+            <label>予約者<select id="booker" required></select></label>
             <label>プレー日<input id="date" type="date" required></label>
             <label>コース<select id="course"><option>OUT</option><option>IN</option></select></label>
             <label>1組目<input id="time1" type="time" required></label>
@@ -74,15 +71,22 @@
           <p id="saveNotice" role="status" aria-live="polite"></p>
         </form>
         <h3>CSV一括登録・更新</h3>
-        <p class="muted">UTF-8のCSVを選択。同じ予約IDは更新、CSVにない予約は保持します。</p>
+        <p class="muted">UTF-8のCSVを選択。同じ予約IDは更新、CSVにない予約は保持します。新規行は予約者を指定してください。</p>
         <input id="csvFile" type="file" accept=".csv,text/csv">
         <button id="importCsv">CSV取込</button>
         <button id="exportCsv" class="secondary">全予約CSV出力</button>
-        <a href="reservations.csv" download>CSV見本</a>
+        <a href="reservations-template.csv" download>CSV見本</a>
         <p id="csvNotice" role="status" aria-live="polite"></p>
+      </section>
+      </div>
+      <section id="overview" aria-labelledby="overviewTitle">
+        <div class="toolbar"><h2 id="overviewTitle">みんなの参加登録状況</h2><button id="overviewReload" class="secondary" type="button">最新情報に更新</button></div>
+        <p class="muted">本日以降の予約を表示します。日付を押すと予約・参加登録ページに移動します。</p>
+        <div id="overviewTable" class="overview-scroll" tabindex="0"></div>
+        <p id="overviewUpdated" class="muted"></p>
       </section>
     </section>
   </main>
-  <footer>Y's TOYO GOLF CLUB</footer>
+  <footer>ys TOYO GOLF CLUB</footer>
 </body>
 </html>

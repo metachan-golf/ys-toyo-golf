@@ -14,7 +14,7 @@ function answerFor(r,m){return answers.find(a=>a.round_id===r.id&&a.member_id===
 function count(r){return answers.filter(a=>a.round_id===r.id&&a.answer==='○').reduce((n,a)=>n+1+a.guests,0);}
 function upcoming(){return rounds.filter(r=>r.play_date>=today());}
 function bookerName(r){return members.find(m=>m.id===r.booker_id)?.name||'未設定';}
-function cancelDate(r){const d=new Date(r.play_date+'T00:00:00Z');d.setUTCDate(d.getUTCDate()-7);return d.toISOString().slice(0,10);}
+function cancelDate(r){const d=new Date(r.play_date+'T00:00:00Z');d.setUTCDate(d.getUTCDate()-3);return d.toISOString().slice(0,10);}
 function needsCancelCheck(r){return ['仮予約','参加募集中','中止'].includes(r.status);}
 function warningText(r){if(!needsCancelCheck(r))return '';const d=cancelDate(r);return (today()>d?'期限経過：':today()===d?'本日が確認期限：':'キャンセル確認期限：')+d+'（ラウンドしない場合は予約サイトでキャンセル）';}
 const overviewPage=location.pathname.endsWith('/overview.html');

@@ -46,9 +46,7 @@ input[type=file]{max-width:100%}.toolbar{display:flex;justify-content:space-betw
 /* Clear, platform-independent forecast icons */
 .weather-symbol{display:inline-flex;align-items:center;justify-content:center;line-height:0;flex-shrink:0}.weather-symbol svg{display:block;width:32px;height:32px}.weather-icon-label{display:inline-flex;flex-direction:column;align-items:center;gap:2px;white-space:normal;text-align:center}.weather-name{font-size:11px!important;line-height:1.25;color:#334155;font-weight:600;overflow-wrap:anywhere}.weather-mini{white-space:normal;vertical-align:middle}.weather-mini .weather-icon-label{max-width:72px}.weather-title{display:flex;align-items:center;gap:7px}.weather-title .weather-symbol svg{width:40px;height:40px}.weather-hour .weather-symbol svg{width:28px;height:28px}.weather-hour .weather-name{font-size:10px!important}
 
-.aqua-traffic{background:white;border:1px solid #c7d6cb;border-radius:12px;margin:14px 0;overflow:hidden}.aqua-traffic summary{padding:14px 16px;font-weight:700;cursor:pointer;color:#174635}.aqua-traffic summary .muted{font-weight:400;margin-left:8px}.aqua-body{padding:0 16px 12px}.aqua-route{font-size:14px;line-height:1.8}.aqua-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.aqua-links .button{font-size:13px;padding:10px 6px}.aqua-weather{background:#edf5f8;border:1px solid #d1e3e9;border-radius:8px;padding:12px;margin-top:12px}.aqua-weather button{padding:6px 12px;font-size:13px}.aqua-weather p{margin:8px 0}.aqua-warning{color:#854d0e;background:#fef3c7;padding:8px;border-radius:6px;font-weight:600}
 
-.aqua-traffic h2{margin:0;padding:14px 16px;color:#174635}
 
 /* Notice text: preserve line breaks and wrap on mobile. */
 .notice-body { white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -58,5 +56,3 @@ input[type=file]{max-width:100%}.toolbar{display:flex;justify-content:space-betw
 
 .notice-preview{border:1px solid #c7d6cb;border-radius:8px;padding:12px;margin:8px 0;background:#f5f8f5}.notice-preview p{margin:6px 0 0}
 
-/* Return traffic tendency: general reference, not live traffic */
-.return-trend{margin:1rem 0;padding:1rem;border:1px solid #c7d6cb;border-radius:10px;background:#fff}.return-trend h3{margin:0 0 .5rem}.return-trend-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}.return-trend-grid>div{padding:.65rem;border-radius:7px;border:1px solid currentColor;display:flex;flex-direction:column;gap:.25rem}.return-trend-grid span{font-size:.85rem}.trend-low{background:#edf6ee;color:#246442}.trend-high{background:#fff0ed;color:#a33c30}.trend-mid{background:#fff6e5;color:#805b14}.return-trend .button{margin-top:.4rem}

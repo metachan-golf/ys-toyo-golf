@@ -10,7 +10,7 @@
 3. Pagesに表示されたURLを開き、管理者アカウントでログインする。
 4. 予約3件の表示、参加登録・変更・取消、CSV出力と再取込を確認する。
 5. Supabase Authentication > Users で残り3名を作成し、SQL Editorで各UIDをmembersに追加する。例（UUIDを実値に置換）:
-   INSERT INTO public.members (id,name,admin) VALUES ('UUID','谷中さん',false);
+   INSERT INTO public.members (id,name,admin) VALUES ('UUID','谷中',false);
 6. 一般メンバーで予約管理画面が表示されず、本人の回答だけ更新できることを確認する。未ログインで予約データを取得できないことも確認する。確認後にLINE共有する。
 
 ## 運用
@@ -59,3 +59,9 @@
 - Android Chrome: インストールボタン、またはメニューからインストール。iPhone Safari: 共有→ホーム画面に追加。LINE内ブラウザからは外部ブラウザを開く。
 - HTTPS必須。オフラインでは予約情報を表示・保存しない。APIや会員情報をService Workerにキャッシュしない。
 - 実機でのインストールとログインは公開後に確認。
+
+## v1.9.1
+表示名の末尾の「さん」を省略。既存DBの名前とUIDは維持。CSVの予約者は敬称あり・なし両方を受け付ける。
+
+## v1.9.2
+- 両ページのログイン選択肢が敬称なしであることを再確認。フッターに版番号を表示し、HTMLの再取得を強化。

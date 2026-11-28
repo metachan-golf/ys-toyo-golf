@@ -11,5 +11,5 @@
   if(promptEvent){const p=promptEvent;promptEvent=null;try{await p.prompt();await p.userChoice;}catch(e){help.hidden=false;help.textContent='ブラウザのメニューからホーム画面に追加してください。';}return;}
   help.hidden=false;help.textContent=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)?'Safariで開き、共有 → ホーム画面に追加 を選択してください。':'Chrome等のブラウザで開き、メニュー → アプリをインストール または ホーム画面に追加 を選択してください。LINE内ブラウザの場合は外部ブラウザで開いてください。';
  });
- if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('PWA registration failed',e));
+ if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js', {updateViaCache:'none'}).catch(e=>console.warn('PWA registration failed',e));
 })();

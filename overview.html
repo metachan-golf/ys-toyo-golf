@@ -9,13 +9,13 @@
   <link rel="icon" type="image/png" sizes="96x96" href="favicon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <script defer src="pwa.js?v=1.10.2"></script>
+  <script defer src="pwa.js?v=1.10.5"></script>
   <title>参加登録状況 | ワイズ トーヨーCCの会</title>
   <meta name="robots" content="noindex,nofollow">
-  <link rel="stylesheet" href="style.css?v=1.10.2">
+  <link rel="stylesheet" href="style.css?v=1.10.5">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="config.js"></script>
-  <script defer src="app.js?v=1.10.2"></script>
+  <script defer src="app.js?v=1.10.5"></script>
 </head>
 <body>
   <header>
@@ -70,7 +70,7 @@
             <label>1組目<input id="time1" type="time" required></label>
             <label>2組目（任意）<input id="time2" type="time"></label>
             <label>定員<input id="capacity" type="number" min="1" max="8" value="8" required></label>
-            <label>状態<select id="status"><option>仮予約</option><option>参加募集中</option><option>開催確定</option><option>開催終了</option><option>中止</option></select></label>
+            <label>状態<select id="status"><option>仮予約</option><option value="開催確定">開催</option><option>中止</option></select></label>
             <label>回答期限<input id="deadline" type="date"></label>
             <label>備考<input id="notes"></label>
           </div>
@@ -96,6 +96,6 @@
       </section>
     </section>
   </main>
-  <footer>ys TOYO GOLF CLUB <small>v1.10.2</small></footer>
+  <footer>ys TOYO GOLF CLUB <small>v1.10.5</small></footer>
 </body>
 </html>

@@ -1,7 +1,9 @@
 'use strict';
 const $=id=>document.getElementById(id), db=supabase.createClient(GOLF_CONFIG.url,GOLF_CONFIG.key);
 let me=null,members=[],rounds=[],answers=[],busy=false,lastLoaded=null;
-const statuses=['仮予約','参加募集中','開催確定','開催終了','中止'];
+const statuses=['仮予約','開催確定','中止'];
+function storedStatus(s){return ({'参加募集中':'仮予約','開催':'開催確定','終了':'開催終了'})[s]||s;}
+function effectiveStatus(r,day=today()){return r.play_date<day||storedStatus(r.status)==='開催終了'?'終了':statusLabel(storedStatus(r.status));}
 function msg(s,error=false){$('message').textContent=s;$('message').className=error?'error':'';}
 function check(r){if(r.error)throw r.error;return r.data;}
 function node(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;}
@@ -12,9 +14,10 @@ function dateLabel(d){return new Date(d+'T12:00:00+09:00').toLocaleDateString('j
 function time(t){return t?t.slice(0,5):'';}
 function answerFor(r,m){return answers.find(a=>a.round_id===r.id&&a.member_id===m.id);}
 function count(r){return answers.filter(a=>a.round_id===r.id&&a.answer==='○').reduce((n,a)=>n+1+a.guests,0);}
-function upcoming(){return rounds.filter(r=>r.play_date>=today());}
+function upcoming(){const day=today();return rounds.filter(r=>effectiveStatus(r,day)!=='終了');}
 function bookerName(r){return members.find(m=>m.id===r.booker_id)?.name||'未設定';}
 function cancelDate(r){const d=new Date(r.play_date+'T00:00:00Z');d.setUTCDate(d.getUTCDate()-3);return d.toISOString().slice(0,10);}
+function statusLabel(status){return status==='開催確定'?'開催':status==='開催終了'?'終了':status==='参加募集中'?'仮予約':status;}
 function needsCancelCheck(r){return ['仮予約','参加募集中','中止'].includes(r.status);}
 function warningText(r){if(!needsCancelCheck(r))return '';const d=cancelDate(r);return (today()>d?'期限経過：':today()===d?'本日が確認期限：':'キャンセル確認期限：')+d+'（ラウンドしない場合は予約サイトでキャンセル）';}
 const overviewPage=location.pathname.endsWith('/overview.html');
@@ -35,14 +38,14 @@ function renderOverview(){
  for(const label of ['日程',...people.map(m=>m.name),'参加人数']){const th=node('th',label);th.scope='col';hr.append(th);}head.append(hr);table.append(head);
  const body=node('tbody');
  for(const r of upcoming()){const row=node('tr');if(r.status==='中止')row.className='cancelled';
-  const day=node('th');day.scope='row';const link=node('a',r.play_date.slice(0,4)+'年 '+dateLabel(r.play_date),'date-link');link.href='index.html?round='+encodeURIComponent(r.id);day.append(link,node('small',r.course+' '+time(r.time1)+(r.time2?' / '+time(r.time2):'')),node('small',r.status));row.append(day);
+  const day=node('th');day.scope='row';const link=node('a',r.play_date.slice(0,4)+'年 '+dateLabel(r.play_date),'date-link');link.href='index.html?round='+encodeURIComponent(r.id);day.append(link,node('small',r.course+' '+time(r.time1)+(r.time2?' / '+time(r.time2):'')),node('small',statusLabel(r.status)));row.append(day);
   for(const m of people){const a=answerFor(r,m);const v=a?.answer||'－';const td=node('td',v,v==='○'?'yes':v==='△'?'maybe':v==='×'?'no':'unanswered');td.title=v==='○'?'参加可能':v==='△'?'調整中':v==='×'?'不参加':'未回答';if(a?.guests)td.append(node('small','＋'+a.guests+'名'));row.append(td);}
   const n=count(r);row.append(node('td',n+' / '+r.capacity,n>r.capacity?'no':'total'));body.append(row);
  }table.append(body);root.append(table);if(!upcoming().length)root.append(node('p','登録された予約はありません。'));
  $('overviewUpdated').textContent=lastLoaded?'最終取得：'+lastLoaded.toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'}):'';
 }
-function renderAdmin(){const root=$('rounds');root.replaceChildren();if(!me?.admin)return;for(const r of visibleRounds()){const card=node('article');card.id='round-'+r.id;const head=node('div',undefined,'toolbar');head.append(node('h2',dateLabel(r.play_date)),node('span',r.status,'status'));card.append(head,node('p',r.course+' '+time(r.time1)+(r.time2?' ／ '+time(r.time2):'')+'　定員 '+r.capacity+'名'),node('p','予約者：'+bookerName(r)),node('p','参加予定 '+count(r)+' / '+r.capacity+'名'));if(needsCancelCheck(r))card.append(node('p',warningText(r),'cancel-reminder'));if(r.notes)card.append(node('p',r.notes));const actions=node('div',undefined,'round-admin-actions');actions.append(button('予約を編集',async()=>{edit(r);$('admin').scrollIntoView({behavior:'smooth'});}),button('予約を削除',async()=>{await deleteRound(r);},'danger-button'));card.append(actions);root.append(card);}if(!root.children.length)root.append(node('p','表示する予約はありません。'));}
-function render(){if(adminPage){renderAdmin();return;}renderOverview();const root=$('rounds');root.replaceChildren();for(const r of visibleRounds()){const card=node('article');card.id='round-'+r.id;const head=node('div',undefined,'toolbar');head.append(node('h2',dateLabel(r.play_date)),node('span',r.status,'status'));card.append(head,node('p',r.course+' '+time(r.time1)+(r.time2?' ／ '+time(r.time2):'')+'　'+(r.time2?2:1)+'組'),node('p','参加予定 '+count(r)+' / '+r.capacity+'名'+(count(r)>r.capacity?'（定員超過・要調整）':'')));card.append(node('p','予約者：'+bookerName(r)));if(needsCancelCheck(r)){const notice=node('div',warningText(r),'cancel-reminder'+(today()>=cancelDate(r)?' urgent':''));const link=node('a','予約サイトを開く ↗');link.href='https://grain-players.net/toyo/reservation';link.target='_blank';link.rel='noopener noreferrer';notice.append(document.createElement('br'),link);card.append(notice);}const p=node('progress');p.max=r.capacity;p.value=count(r);card.append(p);if(r.deadline)card.append(node('p','回答期限：'+r.deadline));if(r.notes)card.append(node('p',r.notes));for(const m of [...members].sort((a,b)=>['谷中','森山','青木','遠藤'].indexOf(a.name)-['谷中','森山','青木','遠藤'].indexOf(b.name))){const a=answerFor(r,m), row=node('div',undefined,'member');row.append(node('span',m.name),node('strong',(a?.answer||'－')+(a?.guests?' ＋ゲスト'+a.guests+'名':'')+(a?.comment?'　'+a.comment:''),a?.answer==='○'?'yes':a?.answer==='△'?'maybe':a?.answer==='×'?'no':'unanswered'));card.append(row);}const mine=answerFor(r,me);if(!['中止','開催終了'].includes(r.status)&&(!r.deadline||today()<=r.deadline)&&r.play_date>=today()){const controls=node('div',undefined,'answer');const guest=node('input');guest.type='number';guest.min='0';guest.max='7';guest.value=mine?.guests||0;const comment=node('input');comment.maxLength=200;comment.value=mine?.comment||'';const gl=node('label','ゲスト人数（本人以外）');gl.append(guest);const cl=node('label','コメント（任意）');cl.append(comment);card.append(gl,cl);for(const [v,label] of [['○','参加'],['△','調整中'],['×','不参加']]){controls.append(button(v+' '+label,async()=>{const n=Number(guest.value);if(!Number.isInteger(n)||n<0||n>7)throw Error('ゲスト人数は0〜7名で入力してください。');check(await db.from('attendance').upsert({round_id:r.id,member_id:me.id,answer:v,guests:v==='○'?n:0,comment:comment.value,updated_at:new Date().toISOString()}));await load();msg('参加回答を保存しました。');},'secondary'+(mine?.answer===v?' selected':'')));}card.append(controls);if(mine)card.append(button('回答を取り消す',async()=>{check(await db.from('attendance').delete().eq('round_id',r.id).eq('member_id',me.id));await load();msg('回答を取り消しました。');}));}root.append(card);}if(!root.children.length)root.append(node('p','表示する予約はありません。'));}
+function renderAdmin(){const root=$('rounds');root.replaceChildren();if(!me?.admin)return;for(const r of visibleRounds()){const card=node('article');card.id='round-'+r.id;const head=node('div',undefined,'toolbar');head.append(node('h2',dateLabel(r.play_date)),node('span',statusLabel(r.status),'status'));card.append(head,node('p',r.course+' '+time(r.time1)+(r.time2?' ／ '+time(r.time2):'')+'　定員 '+r.capacity+'名'),node('p','予約者：'+bookerName(r)),node('p','参加予定 '+count(r)+' / '+r.capacity+'名'));if(needsCancelCheck(r))card.append(node('p',warningText(r),'cancel-reminder'));if(r.notes)card.append(node('p',r.notes));const actions=node('div',undefined,'round-admin-actions');actions.append(button('予約を編集',async()=>{edit(r);$('admin').scrollIntoView({behavior:'smooth'});}),button('予約を削除',async()=>{await deleteRound(r);},'danger-button'));card.append(actions);root.append(card);}if(!root.children.length)root.append(node('p','表示する予約はありません。'));}
+function render(){if(adminPage){renderAdmin();return;}renderOverview();const root=$('rounds');root.replaceChildren();for(const r of visibleRounds()){const card=node('article');card.id='round-'+r.id;const head=node('div',undefined,'toolbar');head.append(node('h2',dateLabel(r.play_date)),node('span',statusLabel(r.status),'status'));card.append(head,node('p',r.course+' '+time(r.time1)+(r.time2?' ／ '+time(r.time2):'')+'　'+(r.time2?2:1)+'組'),node('p','参加予定 '+count(r)+' / '+r.capacity+'名'+(count(r)>r.capacity?'（定員超過・要調整）':'')));card.append(node('p','予約者：'+bookerName(r)));if(needsCancelCheck(r)){const notice=node('div',warningText(r),'cancel-reminder'+(today()>=cancelDate(r)?' urgent':''));const link=node('a','予約サイトを開く ↗');link.href='https://grain-players.net/toyo/reservation';link.target='_blank';link.rel='noopener noreferrer';notice.append(document.createElement('br'),link);card.append(notice);}const p=node('progress');p.max=r.capacity;p.value=count(r);card.append(p);if(r.deadline)card.append(node('p','回答期限：'+r.deadline));if(r.notes)card.append(node('p',r.notes));for(const m of [...members].sort((a,b)=>['谷中','森山','青木','遠藤'].indexOf(a.name)-['谷中','森山','青木','遠藤'].indexOf(b.name))){const a=answerFor(r,m), row=node('div',undefined,'member');row.append(node('span',m.name),node('strong',(a?.answer||'－')+(a?.guests?' ＋ゲスト'+a.guests+'名':'')+(a?.comment?'　'+a.comment:''),a?.answer==='○'?'yes':a?.answer==='△'?'maybe':a?.answer==='×'?'no':'unanswered'));card.append(row);}const mine=answerFor(r,me);if(!['中止','開催終了'].includes(r.status)&&(!r.deadline||today()<=r.deadline)&&r.play_date>=today()){const controls=node('div',undefined,'answer');const guest=node('input');guest.type='number';guest.min='0';guest.max='7';guest.value=mine?.guests||0;const comment=node('input');comment.maxLength=200;comment.value=mine?.comment||'';const gl=node('label','ゲスト人数（本人以外）');gl.append(guest);const cl=node('label','コメント（任意）');cl.append(comment);card.append(gl,cl);for(const [v,label] of [['○','参加'],['△','調整中'],['×','不参加']]){controls.append(button(v+' '+label,async()=>{const n=Number(guest.value);if(!Number.isInteger(n)||n<0||n>7)throw Error('ゲスト人数は0〜7名で入力してください。');check(await db.from('attendance').upsert({round_id:r.id,member_id:me.id,answer:v,guests:v==='○'?n:0,comment:comment.value,updated_at:new Date().toISOString()}));await load();msg('参加回答を保存しました。');},'secondary'+(mine?.answer===v?' selected':'')));}card.append(controls);if(mine)card.append(button('回答を取り消す',async()=>{check(await db.from('attendance').delete().eq('round_id',r.id).eq('member_id',me.id));await load();msg('回答を取り消しました。');}));}root.append(card);}if(!root.children.length)root.append(node('p','表示する予約はありません。'));}
 async function deleteRound(r){
  if(!me?.admin)throw Error('管理者専用です。');
  const label=r.play_date+' '+r.course+' '+time(r.time1)+(r.time2?' / '+time(r.time2):'');
@@ -59,9 +62,9 @@ async function deleteRound(r){
  }catch(e){notice.className='csv-error';notice.textContent=(deleted?'削除済みですが画面更新に失敗しました：':'削除エラー：')+[e.message,e.details,e.hint,e.code].filter(Boolean).join(' / ');}
  notice.scrollIntoView({block:'nearest'});
 }
-function edit(r){$('saveNotice').textContent='';for(const [k,v] of Object.entries({rid:r.id,booker:r.booker_id||'',date:r.play_date,course:r.course,time1:time(r.time1),time2:time(r.time2),capacity:r.capacity,status:r.status,deadline:r.deadline||'',notes:r.notes||''}))$(k).value=v;}
+function edit(r){$('saveNotice').textContent='';for(const [k,v] of Object.entries({rid:r.id,booker:r.booker_id||'',date:r.play_date,course:r.course,time1:time(r.time1),time2:time(r.time2),capacity:r.capacity,status:storedStatus(r.status),deadline:r.deadline||'',notes:r.notes||''}))$(k).value=v;}
 function clearForm(){$('roundForm').reset();$('rid').value='';$('booker').value=me?.id||'';}
-function validate(r){
+function validate(r,{legacyCsv=false}={}){
  const fail=t=>{throw Error(t+'（予約ID：'+r.id+'）');};
  const validDate=d=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&!isNaN(Date.parse(d+'T00:00:00Z'))&&new Date(d+'T00:00:00Z').toISOString().slice(0,10)===d;
  const validTime=t=>/^([01]\d|2[0-3]):[0-5]\d$/.test(t);
@@ -72,7 +75,7 @@ function validate(r){
  if(r.time2&&!validTime(r.time2))fail('2組目の時刻を正しく指定してください。');
  if(!Number.isInteger(r.capacity)||r.capacity<1||r.capacity>(r.time2?8:4))fail('定員は'+(r.time2?'1〜8':'1〜4')+'名で指定してください。');
  if(r.booker_id&&!members.some(m=>m.id===r.booker_id))fail('予約者を確認してください。');
- if(!statuses.includes(r.status))fail('予約状態を確認してください。');
+ if(!statuses.includes(r.status)&&!(legacyCsv&&r.status==='開催終了'&&r.play_date<today()))fail('予約状態を確認してください。');
  if(r.deadline&&(!validDate(r.deadline)||r.deadline>r.play_date))fail('回答期限はプレー日以前の日付を指定してください。');
  return r;
 }
@@ -100,11 +103,11 @@ function csvRows(text){
   if(v.length>h.length&&v.slice(h.length).some(x=>x.trim()))throw Error('見出しのない追加列にデータがあります。');
   const get=k=>v[h.indexOf(k)]??'';
   const id=get('予約ID').trim();
-  const r={id,play_date:normalize(get('プレー日')),course:get('コース').trim().normalize('NFKC').toUpperCase(),time1:normalizeTime(get('1組目')),time2:normalizeTime(get('2組目'))||null,capacity:Number(get('定員').trim().normalize('NFKC')),status:get('状態').trim()};
+  const r={id,play_date:normalize(get('プレー日')),course:get('コース').trim().normalize('NFKC').toUpperCase(),time1:normalizeTime(get('1組目')),time2:normalizeTime(get('2組目'))||null,capacity:Number(get('定員').trim().normalize('NFKC')),status:storedStatus(get('状態').trim())};
   if(h.includes('回答期限'))r.deadline=normalize(get('回答期限'))||null;
   if(h.includes('備考'))r.notes=get('備考');
   if(h.includes('予約者')&&get('予約者').trim()){const name=get('予約者').trim();const m=members.find(m=>m.name.replace(/さん$/,'')===name.replace(/さん$/,''));if(!m)throw Error('予約者が不明です：'+name);r.booker_id=m.id;}
-  if(seen.has(id))throw Error('予約IDが重複しています：'+id);seen.add(id);return validate(r);
+  if(seen.has(id))throw Error('予約IDが重複しています：'+id);seen.add(id);return validate(r,{legacyCsv:true});
  }catch(e){throw Error('データ行 '+(i+1)+'：'+e.message);}});
 }
 function download(name,text){const url=URL.createObjectURL(new Blob(['\uFEFF'+text],{type:'text/csv;charset=utf-8'}));const a=node('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
@@ -144,7 +147,7 @@ $('importCsv').onclick=async()=>{
   const existing=rs.filter(r=>current.some(x=>x.id===r.id)).length;
   if(!confirm(`${rs.length}件を取り込みます（既存ID更新 ${existing}件、新規 ${rs.length-existing}件）。実行しますか？`)){csvMsg('取り込みを中止しました。');return;}
   csvMsg('データベースに保存中…');
-  const merged=rs.map(r=>{const old=current.find(x=>x.id===r.id);if(!old&&!r.booker_id)throw Error('新規予約の予約者を指定してください：'+r.id);return {deadline:old?.deadline??null,notes:old?.notes??'',booker_id:old?.booker_id??null,...r};});
+  const merged=rs.map(r=>{const old=current.find(x=>x.id===r.id);if(!old&&!r.booker_id)throw Error('新規予約の予約者を指定してください：'+r.id);return {deadline:old?.deadline??null,notes:old?.notes??'',booker_id:old?.booker_id??null,...r,status:r.status==='開催終了'&&old&&old.play_date<today()?old.status:r.status};});
   check(await db.from('rounds').upsert(merged,{onConflict:'id'}));saved=true;
   await load();$('month').value='all';render();
   csvMsg(`取り込み完了：${rs.length}件（既存更新 ${existing}件、新規 ${rs.length-existing}件）。本日以降の日程を表示しています。`);
@@ -152,9 +155,9 @@ $('importCsv').onclick=async()=>{
  }catch(e){const detail=[e.message,e.details,e.hint,e.code].filter(Boolean).join(' / ')||String(e);csvMsg((saved?'保存済みですが画面更新に失敗しました：':'取り込みエラー：')+detail,true);}
  finally{busy=false;$('importCsv').disabled=false;csvNotice.scrollIntoView({block:'nearest'});}
 };
-$('exportCsv').onclick=()=>run(async()=>{await load();download('reservations.csv',[headers,...rounds.map(r=>[r.id,r.play_date,r.course,time(r.time1),time(r.time2),r.capacity,r.status,r.deadline,r.notes,r.booker_id?bookerName(r):''])].map(r=>r.map(quote).join(',')).join('\r\n'));});
-$('share').onclick=()=>run(async()=>{const text='【トーヨーCC 参加予定】\n'+visibleRounds().map(r=>dateLabel(r.play_date)+' '+r.course+' '+time(r.time1)+(r.time2?'／'+time(r.time2):'')+' '+r.status+'\n予約者：'+bookerName(r)+(needsCancelCheck(r)?'\n'+warningText(r):'')+'\n'+members.map(m=>{const a=answerFor(r,m);return m.name+'：'+(a?.answer||'－')+(a?.guests?' ＋ゲスト'+a.guests:'');}).join('\n')).join('\n\n');await navigator.clipboard.writeText(text);msg('LINE共有用テキストをコピーしました。');});
-let displayedDay=today();function refreshDay(){if(me&&!activityPage&&today()!==displayedDay){displayedDay=today();run(load);}}document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshDay();});setInterval(refreshDay,60000);
+$('exportCsv').onclick=()=>run(async()=>{await load();download('reservations.csv',[headers,...rounds.map(r=>[r.id,r.play_date,r.course,time(r.time1),time(r.time2),r.capacity,effectiveStatus(r),r.deadline,r.notes,r.booker_id?bookerName(r):''])].map(r=>r.map(quote).join(',')).join('\r\n'));});
+$('share').onclick=()=>run(async()=>{const text='【トーヨーCC 参加予定】\n'+visibleRounds().map(r=>dateLabel(r.play_date)+' '+r.course+' '+time(r.time1)+(r.time2?'／'+time(r.time2):'')+' '+statusLabel(r.status)+'\n予約者：'+bookerName(r)+(needsCancelCheck(r)?'\n'+warningText(r):'')+'\n'+members.map(m=>{const a=answerFor(r,m);return m.name+'：'+(a?.answer||'－')+(a?.guests?' ＋ゲスト'+a.guests:'');}).join('\n')).join('\n\n');await navigator.clipboard.writeText(text);msg('LINE共有用テキストをコピーしました。');});
+let displayedDay=today();function refreshDay(){if(me&&!activityPage&&!busy&&today()!==displayedDay){run(async()=>{await load();displayedDay=today();});}}document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshDay();});setInterval(refreshDay,60000);
 let activityPending=false;
 function clearActivity(){const el=$('activityList');if(el)el.replaceChildren();if($('activitySection'))$('activitySection').hidden=true;}
 function deviceType(){const u=navigator.userAgent;return /Android/i.test(u)?'Android':/iPhone|iPad|iPod/i.test(u)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)?'iPhone/iPad':/Windows|Macintosh|Linux|CrOS/i.test(u)?'PC':'その他';}

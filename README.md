@@ -71,3 +71,6 @@
 
 ## v1.9.4
 Google検索対応：トップページのタイトル・説明・canonical・OGP・WebSite構造化データ・favicon・sitemap.xmlを追加。overview.htmlはnoindex。ログイン欄はdata-nosnippet（非公開化ではない）。Google所有権確認HTMLとconfig.js、logo.pngは削除しない。Search Consoleに https://metachan-golf.github.io/ys-toyo-golf/sitemap.xml を登録し、トップURLのインデックス登録をリクエスト。実予約CSVは公開リポジトリから削除を推奨（過去のコミットにも残り得る）。
+
+## v1.9.5
+依頼によりサイト紹介文を画面、meta description、OGP descriptionから削除。その他のSEO設定を維持。

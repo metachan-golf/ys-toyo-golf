@@ -1,6 +1,6 @@
 'use strict';
 let scoreData=[],noticeData=[];
-const featurePage=location.pathname.endsWith('/scores.html')?'scores':location.pathname.endsWith('/results.html')?'results':location.pathname.endsWith('/awards.html')?'awards':location.pathname.endsWith('/notices.html')?'notices':'';
+const featurePage=location.pathname.endsWith('/scores.html')?'scores':location.pathname.endsWith('/results.html')?'results':location.pathname.endsWith('/awards.html')?'awards':location.pathname.endsWith('/notices.html')?'notices':location.pathname.endsWith('/traffic.html')?'traffic':'';
 function stats(rs){const sorted=[...rs].sort((a,b)=>a.play_date.localeCompare(b.play_date));const totals=sorted.map(r=>r.out_score+r.in_score),avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:null,p=sorted.filter(r=>r.putts!=null).map(r=>r.putts);return {n:totals.length,avg:avg(totals),best:totals.length?Math.min(...totals):null,worst:totals.length?Math.max(...totals):null,recent:avg(totals.slice(-5)),out:avg(sorted.map(r=>r.out_score)),in:avg(sorted.map(r=>r.in_score)),putts:avg(p),pn:p.length,under:totals.length?100*totals.filter(x=>x<100).length/totals.length:null,improve:totals.length>=6?avg(totals.slice(0,3))-avg(totals.slice(-3)):null,sorted};}
 const fmt=x=>x==null?'－':Number(x).toFixed(1);
 function avgName(m){return m.name+'（AVG '+fmt(stats(scoreData.filter(s=>s.member_id===m.id)).avg)+'）';}

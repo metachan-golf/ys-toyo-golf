@@ -71,7 +71,7 @@ function validate(r){
  if(r.deadline&&(!validDate(r.deadline)||r.deadline>r.play_date))fail('回答期限はプレー日以前の日付を指定してください。');
  return r;
 }
-function parseCSV(s){s=s.replace(/^\uFEFF/,'');let rows=[],row=[],cell='',q=false;for(let i=0;i<s.length;i++){let c=s[i];if(q){if(c==='"'&&s[i+1]==='"'){cell+='"';i++;}else if(c==='"')q=false;else cell+=c;}else if(c==='"'&&cell==='')q=true;else if(c===','){row.push(cell);cell='';}else if(c==='\n'||c==='\r'){if(c==='\r'&&s[i+1]==='\n')i++;row.push(cell);if(row.some(x=>x!==''))rows.push(row);row=[];cell='';}else cell+=c;}if(q)throw Error('CSVの引用符が閉じていません。');row.push(cell);if(row.some(x=>x!==''))rows.push(row);return rows;}
+function parseCSV(s,delimiter=','){s=s.replace(/^\uFEFF/,'');let rows=[],row=[],cell='',q=false;for(let i=0;i<s.length;i++){let c=s[i];if(q){if(c==='"'&&s[i+1]==='"'){cell+='"';i++;}else if(c==='"')q=false;else cell+=c;}else if(c==='"'&&cell==='')q=true;else if(c===delimiter){row.push(cell);cell='';}else if(c==='\n'||c==='\r'){if(c==='\r'&&s[i+1]==='\n')i++;row.push(cell);if(row.some(x=>x!==''))rows.push(row);row=[];cell='';}else cell+=c;}if(q)throw Error('CSVの引用符が閉じていません。');row.push(cell);if(row.some(x=>x!==''))rows.push(row);return rows;}
 const headers=['予約ID','プレー日','コース','1組目','2組目','定員','状態','回答期限','備考','予約者'];
 async function readCSV(file){
  const bytes=new Uint8Array(await file.arrayBuffer());
@@ -80,7 +80,8 @@ async function readCSV(file){
  try{return new TextDecoder('utf-8',{fatal:true}).decode(bytes);}catch(e){try{return new TextDecoder('shift_jis',{fatal:true}).decode(bytes);}catch(e){throw Error('文字コードを判定できません。ExcelでCSV UTF-8として保存してください。');}}
 }
 function csvRows(text){
- const rows=parseCSV(text).filter(row=>row.some(v=>v.trim()!==''));
+ const candidates=[',','\t',';'].map(delimiter=>{try{const rows=parseCSV(text,delimiter).filter(row=>row.some(v=>v.trim()!==''));const h=(rows[0]||[]).map(v=>v.trim().normalize('NFKC'));return {rows,score:headers.slice(0,7).filter(k=>h.includes(k)).length};}catch(error){return {error,score:-1};}}).sort((a,b)=>b.score-a.score);
+ const best=candidates[0];if(best.error)throw best.error;const rows=best.rows;
  const [raw,...rs]=rows;if(!raw)throw Error('CSVが空です。');
  const h=raw.map(v=>v.replace(/^\uFEFF/,'').trim().normalize('NFKC'));
  const required=headers.slice(0,7);const missing=required.filter(v=>!h.includes(v));

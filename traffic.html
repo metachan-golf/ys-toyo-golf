@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" sizes="96x96" href="favicon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <script defer src="pwa.js?v=1.16.4"></script>
+  <script defer src="pwa.js?v=1.16.5"></script>
   <title>ys TOYO GOLF CLUB｜ワイズ トーヨーCCの会</title>
   <meta name="robots" content="noindex,nofollow">
   <link rel="canonical" href="https://metachan-golf.github.io/ys-toyo-golf/">
@@ -21,13 +21,13 @@
   <meta property="og:locale" content="ja_JP">
   <meta name="twitter:card" content="summary">
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "ys TOYO GOLF CLUB", "alternateName": "ワイズ トーヨーCCの会", "url": "https://metachan-golf.github.io/ys-toyo-golf/"}</script>
-  <link rel="stylesheet" href="style.css?v=1.16.4">
+  <link rel="stylesheet" href="style.css?v=1.16.5">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="config.js"></script>
-  <script defer src="traffic.js?v=1.16.4"></script>
-  <script defer src="weather.js?v=1.16.4"></script>
-  <script defer src="features.js?v=1.16.4"></script>
-  <script defer src="app.js?v=1.16.4"></script>
+  <script defer src="traffic.js?v=1.16.5"></script>
+  <script defer src="weather.js?v=1.16.5"></script>
+  <script defer src="features.js?v=1.16.5"></script>
+  <script defer src="app.js?v=1.16.5"></script>
 </head>
 <body>
   <header>
@@ -64,6 +64,19 @@
         <h2>アクアライン交通情報</h2>
         <div class="aqua-body">
           <p class="aqua-route">下り：川崎 → 木更津（往路）<br>上り：木更津 → 川崎（復路）</p>
+          <section class="return-trend" aria-labelledby="returnTrendTitle">
+            <h3 id="returnTrendTitle">帰宅時間帯の混雑傾向（上り）</h3>
+            <p>木更津 → 川崎方面・土日祝日の参考目安</p>
+            <div class="return-trend-grid">
+              <div class="trend-low"><strong>13時前</strong><span>混雑ピーク前の候補</span></div>
+              <div class="trend-high"><strong>13～19時</strong><span>混雑に注意</span></div>
+              <div class="trend-mid"><strong>19～20時</strong><span>当日の状況を確認</span></div>
+              <div class="trend-low"><strong>20時以降</strong><span>推奨時間帯</span></div>
+            </div>
+            <p class="muted">休日の一般的な目安であり、現在の渋滞状況や個別日の予測ではありません。事故・規制などにより変動します。</p>
+            <a class="button secondary" href="https://www.driveplaza.com/trip/area/kanto/traffic/aqualine/" target="_blank" rel="noopener noreferrer">本日午後のAI渋滞予知（13時発表予定） ↗</a>
+            <p class="muted">参考：<a href="https://www.pref.chiba.lg.jp/doukei/aqualine/aqualine-shakaijikken.html" target="_blank" rel="noopener noreferrer">千葉県 ETC時間帯別料金の社会実験（2026年3月19日更新）</a></p>
+          </section>
           <div class="aqua-links">
             <a class="button secondary" href="https://www.driveplaza.com/traffic/roadinfo/" target="_blank" rel="noopener noreferrer">リアルタイム渋滞・規制 ↗</a>
             <a class="button secondary" href="https://www.driveplaza.com/trip/area/kanto/traffic/aqualine/" target="_blank" rel="noopener noreferrer">上り AI渋滞予知 ↗</a>
@@ -123,7 +136,7 @@
     </section>
   </main>
   <footer class="site-footer">
-    <div class="footer-club">ys TOYO GOLF CLUB <small>v1.16.4</small></div>
+    <div class="footer-club">ys TOYO GOLF CLUB <small>v1.16.5</small></div>
     <div class="footer-credit"><span class="footer-since">since 2026/11</span><span class="footer-separator" aria-hidden="true"></span><span>powered by <a href="https://metachan.jp/" target="_blank" rel="noopener noreferrer">めたちゃんDX相談所 <span aria-hidden="true">↗</span></a></span></div>
   </footer>
 </body>

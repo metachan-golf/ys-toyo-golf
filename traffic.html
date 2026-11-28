@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" sizes="96x96" href="favicon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <script defer src="pwa.js?v=1.16.5"></script>
+  <script defer src="pwa.js?v=1.16.6"></script>
   <title>ys TOYO GOLF CLUB｜ワイズ トーヨーCCの会</title>
   <meta name="robots" content="noindex,nofollow">
   <link rel="canonical" href="https://metachan-golf.github.io/ys-toyo-golf/">
@@ -21,13 +21,13 @@
   <meta property="og:locale" content="ja_JP">
   <meta name="twitter:card" content="summary">
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "ys TOYO GOLF CLUB", "alternateName": "ワイズ トーヨーCCの会", "url": "https://metachan-golf.github.io/ys-toyo-golf/"}</script>
-  <link rel="stylesheet" href="style.css?v=1.16.5">
+  <link rel="stylesheet" href="style.css?v=1.16.6">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="config.js"></script>
-  <script defer src="traffic.js?v=1.16.5"></script>
-  <script defer src="weather.js?v=1.16.5"></script>
-  <script defer src="features.js?v=1.16.5"></script>
-  <script defer src="app.js?v=1.16.5"></script>
+  <script defer src="traffic.js?v=1.16.6"></script>
+  <script defer src="weather.js?v=1.16.6"></script>
+  <script defer src="features.js?v=1.16.6"></script>
+  <script defer src="app.js?v=1.16.6"></script>
 </head>
 <body>
   <header>
@@ -42,7 +42,7 @@
   </header>
   <main>
     <div id="installArea" class="install-area" hidden><button type="button" id="installApp" class="secondary">スマホにインストール</button><p id="installHelp" role="status" hidden></p></div>
-    <a class="button" href="https://grain-players.net/toyo/reservation" target="_blank" rel="noopener noreferrer">ゴルフ場予約サイト ↗</a>
+
     <p id="message" role="status" aria-live="polite"></p>
 
     <section id="login" data-nosnippet>
@@ -74,16 +74,11 @@
               <div class="trend-low"><strong>20時以降</strong><span>推奨時間帯</span></div>
             </div>
             <p class="muted">休日の一般的な目安であり、現在の渋滞状況や個別日の予測ではありません。事故・規制などにより変動します。</p>
-            <a class="button secondary" href="https://www.driveplaza.com/trip/area/kanto/traffic/aqualine/" target="_blank" rel="noopener noreferrer">本日午後のAI渋滞予知（13時発表予定） ↗</a>
-            <p class="muted">参考：<a href="https://www.pref.chiba.lg.jp/doukei/aqualine/aqualine-shakaijikken.html" target="_blank" rel="noopener noreferrer">千葉県 ETC時間帯別料金の社会実験（2026年3月19日更新）</a></p>
+
+            <p class="muted">参考：千葉県 ETC時間帯別料金の社会実験（2026年3月19日更新）</p>
           </section>
-          <div class="aqua-links">
-            <a class="button secondary" href="https://www.driveplaza.com/traffic/roadinfo/" target="_blank" rel="noopener noreferrer">リアルタイム渋滞・規制 ↗</a>
-            <a class="button secondary" href="https://www.driveplaza.com/trip/area/kanto/traffic/aqualine/" target="_blank" rel="noopener noreferrer">上り AI渋滞予知 ↗</a>
-            <a class="button secondary" href="https://livecamera.fujiyamasan.com/chiba-kisarazu-tokyo-bay-aqua-bridge.html" target="_blank" rel="noopener noreferrer">ライブカメラ案内 ↗</a>
-            <a class="button secondary" href="https://www.google.com/maps/@35.46379,139.8749,11z/data=!5m1!1e1" target="_blank" rel="noopener noreferrer">Google Maps交通状況 ↗</a>
-          </div>
-          <div class="aqua-weather"><div class="toolbar"><strong>海ほたる周辺の風</strong><button id="aquaRefresh" type="button" class="secondary">更新</button></div><div id="aquaWind" role="status" aria-live="polite">取得待ち</div><p class="muted">気象データ：<a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>（地上10mのモデル推定値）</p></div>
+
+          <div class="aqua-weather"><div class="toolbar"><strong>海ほたる周辺の風</strong><button id="aquaRefresh" type="button" class="secondary">更新</button></div><div id="aquaWind" role="status" aria-live="polite">取得待ち</div><p class="muted">気象データ：Open-Meteo（地上10mのモデル推定値）</p></div>
           <p class="muted">風速は実測値ではありません。強風注意は独自の参考表示（風速10m/s以上または突風15m/s以上）で、通行止め基準ではありません。渋滞・事故・通行止めは公式情報で確認してください。運転中の操作はしないでください。</p>
         </div>
       </section>
@@ -136,8 +131,8 @@
     </section>
   </main>
   <footer class="site-footer">
-    <div class="footer-club">ys TOYO GOLF CLUB <small>v1.16.5</small></div>
-    <div class="footer-credit"><span class="footer-since">since 2026/11</span><span class="footer-separator" aria-hidden="true"></span><span>powered by <a href="https://metachan.jp/" target="_blank" rel="noopener noreferrer">めたちゃんDX相談所 <span aria-hidden="true">↗</span></a></span></div>
+    <div class="footer-club">ys TOYO GOLF CLUB <small>v1.16.6</small></div>
+    <div class="footer-credit"><span class="footer-since">since 2026/11</span><span class="footer-separator" aria-hidden="true"></span><span>powered by めたちゃんDX相談所</span></div>
   </footer>
 </body>
 </html>

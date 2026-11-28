@@ -26,3 +26,5 @@ input[type=file]{max-width:100%}.toolbar{display:flex;justify-content:space-betw
 #saveNotice:empty{display:none}#saveNotice{padding:12px;border-radius:8px;white-space:pre-wrap;margin:12px 0 0;overflow-wrap:anywhere}
 
 .page-nav{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.page-nav a{flex:1}.cancel-reminder{background:#fff8e5;border:1px solid #d9b86b;border-radius:8px;padding:10px;margin:10px 0;color:#674900}.cancel-reminder.urgent{background:#fff0ef;border-color:#c65b53;color:#9d2923}.cancel-reminder a{color:inherit;font-weight:600}.overview-table small{white-space:normal}.date-link{display:inline-block}
+
+.install-area{margin:12px 0}.install-area button{width:100%}.install-area p{font-size:14px;margin:8px 0;color:#17382c}

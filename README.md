@@ -53,3 +53,9 @@
 ## Ver.1.8
 - CSVのUTF-8/Shift_JIS/UTF-16 BOMを判定。必須見出しを名前で照合し、列順の変更・余分な列・空行に対応。エラーに不足見出しやデータ行番号を表示。
 - 更新時は index.html、overview.html、app.js、style.css、README.md、reservations-template.csv を上書き。追加SQL不要。
+
+## v1.9 PWA対応
+- ZIP内の全11ファイルをリポジトリ直下に配置。既存の config.js と logo.png は保持。
+- Android Chrome: インストールボタン、またはメニューからインストール。iPhone Safari: 共有→ホーム画面に追加。LINE内ブラウザからは外部ブラウザを開く。
+- HTTPS必須。オフラインでは予約情報を表示・保存しない。APIや会員情報をService Workerにキャッシュしない。
+- 実機でのインストールとログインは公開後に確認。

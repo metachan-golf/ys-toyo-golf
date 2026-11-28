@@ -3,16 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#174635">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="ys TOYO">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <script defer src="pwa.js?v=1.9"></script>
   <title>参加登録状況 | ワイズ トーヨーCCの会</title>
-  <link rel="stylesheet" href="style.css?v=1.8">
+  <link rel="stylesheet" href="style.css?v=1.9">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="config.js"></script>
-  <script defer src="app.js?v=1.8"></script>
+  <script defer src="app.js?v=1.9"></script>
 </head>
 <body>
   <header>
     <div class="brand">
-      <img src="logo.png" alt="YS × TOYO ロゴ" class="brand-logo">
+      <img src="logo.png" alt="ys × TOYO ロゴ" class="brand-logo">
       <div class="brand-copy">
         <small>ys TRANS × TOYO COUNTRY CLUB</small>
         <h1>ワイズ トーヨーCCの会</h1>
@@ -21,6 +27,7 @@
     </div>
   </header>
   <main>
+    <div id="installArea" class="install-area" hidden><button type="button" id="installApp" class="secondary">スマホにインストール</button><p id="installHelp" role="status" hidden></p></div>
     <a class="button" href="https://grain-players.net/toyo/reservation" target="_blank" rel="noopener noreferrer">ゴルフ場予約サイト ↗</a>
     <p id="message" role="status" aria-live="polite"></p>
 

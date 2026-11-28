@@ -9,13 +9,13 @@
   <link rel="icon" type="image/png" sizes="96x96" href="favicon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <script defer src="pwa.js?v=1.9.7"></script>
+  <script defer src="pwa.js?v=1.9.9"></script>
   <title>予約管理 | ワイズ トーヨーCCの会</title>
   <meta name="robots" content="noindex,nofollow">
-  <link rel="stylesheet" href="style.css?v=1.9.7">
+  <link rel="stylesheet" href="style.css?v=1.9.9">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="config.js"></script>
-  <script defer src="app.js?v=1.9.7"></script>
+  <script defer src="app.js?v=1.9.9"></script>
 </head>
 <body>
   <header>
@@ -62,6 +62,7 @@
       </div>
       <section id="admin" hidden>
         <h2>予約管理</h2>
+        <section id="activitySection" hidden data-nosnippet><div class="toolbar"><h3>メンバー利用状況</h3><button id="activityReload" type="button" class="secondary">利用状況を更新</button></div><p class="muted">日本時間。直近5分以内はアクセスの目安です。ログイン回数は機能追加後に確認した回数で、過去の全履歴ではありません。</p><div id="activityList" class="activity-list"></div><p id="activityNotice" role="status" class="muted"></p></section>
         <form id="roundForm">
           <input id="rid" type="hidden">
           <div class="fields">
@@ -97,6 +98,6 @@
       </section>
     </section>
   </main>
-  <footer>ys TOYO GOLF CLUB <small>v1.9.8</small></footer>
+  <footer>ys TOYO GOLF CLUB <small>v1.9.9</small></footer>
 </body>
 </html>

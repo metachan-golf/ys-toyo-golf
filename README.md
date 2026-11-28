@@ -74,3 +74,6 @@ Google検索対応：トップページのタイトル・説明・canonical・OG
 
 ## v1.9.5
 依頼によりサイト紹介文を画面、meta description、OGP descriptionから削除。その他のSEO設定を維持。
+
+## v1.9.6
+スマホ・タブレットのブラウザだけにインストール案内を表示。PCおよびインストール済みの standalone では非表示。

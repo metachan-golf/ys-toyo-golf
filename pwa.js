@@ -3,9 +3,10 @@
  if(!area || !btn || !help) return;
  let promptEvent=null;
  const installed=()=>window.matchMedia('(display-mode: standalone)').matches || navigator.standalone===true;
- const refresh=()=>{area.hidden=installed();};
+ const mobile=()=>navigator.userAgentData?.mobile===true || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+ const refresh=()=>{area.hidden=!mobile() || installed();};
  refresh();
- window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptEvent=e;refresh();});
+ window.addEventListener('beforeinstallprompt',e=>{if(!mobile()) return; e.preventDefault();promptEvent=e;refresh();});
  window.addEventListener('appinstalled',()=>{promptEvent=null;area.hidden=true;});
  btn.addEventListener('click',async()=>{
   if(promptEvent){const p=promptEvent;promptEvent=null;try{await p.prompt();await p.userChoice;}catch(e){help.hidden=false;help.textContent='ブラウザのメニューからホーム画面に追加してください。';}return;}

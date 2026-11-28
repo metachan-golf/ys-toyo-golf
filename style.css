@@ -38,3 +38,6 @@ input[type=file]{max-width:100%}.toolbar{display:flex;justify-content:space-betw
 .page-nav a[aria-current="page"]{background:#175a40;color:white;border-color:#175a40}
 
 .activity-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}.activity-card{border:1px solid #c7d6cb;border-radius:10px;padding:12px;display:grid;gap:5px;font-size:.9rem}.activity-card strong{font-size:1.05rem;color:#174635}
+
+.page-nav a[hidden], #activitySection[hidden], #schedulePage[hidden], #admin[hidden], #overview[hidden]{display:none!important}
+.page-nav a{flex:1 1 40%}

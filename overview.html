@@ -6,14 +6,16 @@
   <meta name="theme-color" content="#174635">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="ys TOYO">
+  <link rel="icon" type="image/png" sizes="96x96" href="favicon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <script defer src="pwa.js?v=1.9.3"></script>
+  <script defer src="pwa.js?v=1.9.4"></script>
   <title>参加登録状況 | ワイズ トーヨーCCの会</title>
-  <link rel="stylesheet" href="style.css?v=1.9.3">
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="style.css?v=1.9.4">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="config.js"></script>
-  <script defer src="app.js?v=1.9.3"></script>
+  <script defer src="app.js?v=1.9.4"></script>
 </head>
 <body>
   <header>
@@ -31,7 +33,7 @@
     <a class="button" href="https://grain-players.net/toyo/reservation" target="_blank" rel="noopener noreferrer">ゴルフ場予約サイト ↗</a>
     <p id="message" role="status" aria-live="polite"></p>
 
-    <section id="login">
+    <section id="login" data-nosnippet>
       <h2>メンバーログイン</h2>
       <form id="loginForm">
         <label>メンバー<select id="loginMember" autocomplete="username" required><option value="">選択してください</option><option value="yanaka">谷中</option><option value="moriyama">森山</option><option value="aoki">青木</option><option value="endo">遠藤</option></select></label>
@@ -40,7 +42,7 @@
       </form>
     </section>
 
-    <section id="club" hidden>
+    <section id="club" hidden data-nosnippet>
       <div class="toolbar">
         <strong id="who"></strong>
         <button id="logout" class="secondary">ログアウト</button>
@@ -94,6 +96,6 @@
       </section>
     </section>
   </main>
-  <footer>ys TOYO GOLF CLUB <small>v1.9.3</small></footer>
+  <footer>ys TOYO GOLF CLUB <small>v1.9.4</small></footer>
 </body>
 </html>

@@ -68,3 +68,6 @@
 
 ## v1.9.3
 - CSV取り込み時にカンマ・タブ・セミコロン区切りを見出しから判定。Shift_JIS/UTF-8等の既存対応を維持。追加SQL不要。
+
+## v1.9.4
+Google検索対応：トップページのタイトル・説明・canonical・OGP・WebSite構造化データ・favicon・sitemap.xmlを追加。overview.htmlはnoindex。ログイン欄はdata-nosnippet（非公開化ではない）。Google所有権確認HTMLとconfig.js、logo.pngは削除しない。Search Consoleに https://metachan-golf.github.io/ys-toyo-golf/sitemap.xml を登録し、トップURLのインデックス登録をリクエスト。実予約CSVは公開リポジトリから削除を推奨（過去のコミットにも残り得る）。

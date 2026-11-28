@@ -47,17 +47,18 @@
         <strong id="who"></strong>
         <button id="logout" class="secondary">ログアウト</button>
       </div>
-      <nav class="page-nav"><a class="button secondary" href="index.html">予約・参加登録</a><a class="button secondary" href="overview.html">みんなの参加登録状況</a></nav>
+      <nav class="page-nav"><a class="button secondary" href="index.html">予約・参加登録</a><a class="button secondary" href="overview.html">みんなの参加登録状況</a><a id="adminMenu" class="button secondary" href="admin.html" hidden>予約管理</a></nav>
       <div id="schedulePage">
       <div class="toolbar">
         <label>表示月<select id="month"></select></label>
         <button id="reload" class="secondary">更新</button>
       </div>
-      <p class="muted">○ 参加可能　△ 調整中　× 不参加　－ 未回答</p>
+      <p id="answerLegend" class="muted">○ 参加可能　△ 調整中　× 不参加　－ 未回答</p>
       <p id="deleteNotice" role="status" aria-live="polite"></p>
       <div id="rounds"></div>
       <button id="share" class="secondary">LINE共有用テキストをコピー</button>
 
+      </div>
       <section id="admin" hidden>
         <h2>予約管理</h2>
         <form id="roundForm">
@@ -87,7 +88,6 @@
         <a href="reservations-template.csv" download>CSV見本</a>
         <p id="csvNotice" role="status" aria-live="polite"></p>
       </section>
-      </div>
       <section id="overview" aria-labelledby="overviewTitle">
         <div class="toolbar"><h2 id="overviewTitle">みんなの参加登録状況</h2><button id="overviewReload" class="secondary" type="button">最新情報に更新</button></div>
         <p class="muted">本日以降の予約を表示します。日付を押すと予約・参加登録ページに移動します。</p>
@@ -96,6 +96,6 @@
       </section>
     </section>
   </main>
-  <footer>ys TOYO GOLF CLUB <small>v1.9.7</small></footer>
+  <footer>ys TOYO GOLF CLUB <small>v1.9.8</small></footer>
 </body>
 </html>

@@ -73,7 +73,34 @@ function validate(r){
 }
 function parseCSV(s){s=s.replace(/^\uFEFF/,'');let rows=[],row=[],cell='',q=false;for(let i=0;i<s.length;i++){let c=s[i];if(q){if(c==='"'&&s[i+1]==='"'){cell+='"';i++;}else if(c==='"')q=false;else cell+=c;}else if(c==='"'&&cell==='')q=true;else if(c===','){row.push(cell);cell='';}else if(c==='\n'||c==='\r'){if(c==='\r'&&s[i+1]==='\n')i++;row.push(cell);if(row.some(x=>x!==''))rows.push(row);row=[];cell='';}else cell+=c;}if(q)throw Error('CSVの引用符が閉じていません。');row.push(cell);if(row.some(x=>x!==''))rows.push(row);return rows;}
 const headers=['予約ID','プレー日','コース','1組目','2組目','定員','状態','回答期限','備考','予約者'];
-function csvRows(text){const [h,...rs]=parseCSV(text);if(!h||h.length<7||h.length>10||h.some((v,i)=>v.trim()!==headers[i])||!rs.length)throw Error('CSVの見出しまたはデータが不正です。');const seen=new Set();return rs.map(v=>{if(v.length!==h.length)throw Error('CSVの列数が不正です。');const [id,date,course,t1,t2,cap,status,deadline,notes,booker]=v;const normalize=d=>d.trim().replaceAll('/','-').replace(/^(\d{4})-(\d{1,2})-(\d{1,2})$/,(_,y,m,d)=>y+'-'+m.padStart(2,'0')+'-'+d.padStart(2,'0'));const r={id:id.trim(),play_date:normalize(date),course:course.trim(),time1:t1.trim().slice(0,5).padStart(5,'0'),time2:t2.trim()?t2.trim().slice(0,5).padStart(5,'0'):null,capacity:Number(cap),status:status.trim()};if(h.length>=8)r.deadline=deadline.trim()?normalize(deadline):null;if(h.length>=9)r.notes=notes;if(h.length>=10&&booker.trim()){const m=members.find(m=>m.name===booker.trim()||m.name.replace(/さん$/,'')===booker.trim());if(!m)throw Error('予約者が不明です：'+booker);r.booker_id=m.id;}if(seen.has(r.id))throw Error('予約IDが重複しています：'+r.id);seen.add(r.id);return validate(r);});}
+async function readCSV(file){
+ const bytes=new Uint8Array(await file.arrayBuffer());
+ if(bytes[0]===255&&bytes[1]===254)return new TextDecoder('utf-16le',{fatal:true}).decode(bytes);
+ if(bytes[0]===254&&bytes[1]===255)return new TextDecoder('utf-16be',{fatal:true}).decode(bytes);
+ try{return new TextDecoder('utf-8',{fatal:true}).decode(bytes);}catch(e){try{return new TextDecoder('shift_jis',{fatal:true}).decode(bytes);}catch(e){throw Error('文字コードを判定できません。ExcelでCSV UTF-8として保存してください。');}}
+}
+function csvRows(text){
+ const rows=parseCSV(text).filter(row=>row.some(v=>v.trim()!==''));
+ const [raw,...rs]=rows;if(!raw)throw Error('CSVが空です。');
+ const h=raw.map(v=>v.replace(/^\uFEFF/,'').trim().normalize('NFKC'));
+ const required=headers.slice(0,7);const missing=required.filter(v=>!h.includes(v));
+ if(missing.length)throw Error('不足している見出し：'+missing.join('、')+'。読み取った見出し：'+h.join(' / '));
+ if(new Set(h.filter(Boolean)).size!==h.filter(Boolean).length)throw Error('見出しが重複しています。');
+ if(!rs.length)throw Error('予約データがありません。');
+ const seen=new Set();
+ const normalize=d=>d.trim().normalize('NFKC').replaceAll('/','-').replace(/^(\d{4})-(\d{1,2})-(\d{1,2})$/,(_,y,m,d)=>y+'-'+m.padStart(2,'0')+'-'+d.padStart(2,'0'));
+ const normalizeTime=t=>t.trim().normalize('NFKC').replace(/^(\d{1,2}):(\d{2})(?::00)?$/,(_,h,m)=>h.padStart(2,'0')+':'+m);
+ return rs.map((v,i)=>{try{
+  if(v.length>h.length&&v.slice(h.length).some(x=>x.trim()))throw Error('見出しのない追加列にデータがあります。');
+  const get=k=>v[h.indexOf(k)]??'';
+  const id=get('予約ID').trim();
+  const r={id,play_date:normalize(get('プレー日')),course:get('コース').trim().normalize('NFKC').toUpperCase(),time1:normalizeTime(get('1組目')),time2:normalizeTime(get('2組目'))||null,capacity:Number(get('定員').trim().normalize('NFKC')),status:get('状態').trim()};
+  if(h.includes('回答期限'))r.deadline=normalize(get('回答期限'))||null;
+  if(h.includes('備考'))r.notes=get('備考');
+  if(h.includes('予約者')&&get('予約者').trim()){const name=get('予約者').trim();const m=members.find(m=>m.name===name||m.name.replace(/さん$/,'')===name);if(!m)throw Error('予約者が不明です：'+name);r.booker_id=m.id;}
+  if(seen.has(id))throw Error('予約IDが重複しています：'+id);seen.add(id);return validate(r);
+ }catch(e){throw Error('データ行 '+(i+1)+'：'+e.message);}});
+}
 function download(name,text){const url=URL.createObjectURL(new Blob(['\uFEFF'+text],{type:'text/csv;charset=utf-8'}));const a=node('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function quote(v){let s=String(v??'');if(/^[=+\-@\t\r]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"';}
 $('loginForm').onsubmit=e=>{e.preventDefault();run(async()=>{check(await db.auth.signInWithPassword({email:$('loginMember').value+'@ys-toyo.example',password:$('password').value}));$('password').value='';await session();msg('ログインしました。');});};
@@ -106,7 +133,7 @@ $('importCsv').onclick=async()=>{
   if(!me?.admin)throw Error('管理者専用です。');
   const f=$('csvFile').files[0];if(!f)throw Error('CSVファイルを選択してください。');
   csvMsg('CSVを確認中…');
-  const rs=csvRows(await f.text());
+  const rs=csvRows(await readCSV(f));
   const current=check(await db.from('rounds').select('*'));
   const existing=rs.filter(r=>current.some(x=>x.id===r.id)).length;
   if(!confirm(`${rs.length}件を取り込みます（既存ID更新 ${existing}件、新規 ${rs.length-existing}件）。実行しますか？`)){csvMsg('取り込みを中止しました。');return;}

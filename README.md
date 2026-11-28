@@ -49,3 +49,7 @@
 
 ## v1.7
 キャンセル確認期限をプレー日の3日前に変更。既存の v1.6 環境では SQL の追加実行は不要。
+
+## Ver.1.8
+- CSVのUTF-8/Shift_JIS/UTF-16 BOMを判定。必須見出しを名前で照合し、列順の変更・余分な列・空行に対応。エラーに不足見出しやデータ行番号を表示。
+- 更新時は index.html、overview.html、app.js、style.css、README.md、reservations-template.csv を上書き。追加SQL不要。
